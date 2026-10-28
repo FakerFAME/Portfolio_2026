@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PratyushOS - Pratyush Kumar (Fame) Portfolio</title>
+    <style>
+        :root {
+            --win-bg: #c0c0c0;
+            --win-border-light: #ffffff;
+            --win-border-dark: #808080;
+            --win-border-darker: #000000;
+            --win-title-active: #000080;
+            --win-title-gradient: #1084d0;
+            --win-title-inactive: #808080;
+            --desktop-bg: #008080;
+            --accent-green: #00ff66;
+            --accent-cyan: #00e5ff;
+            --text-dark: #000000;
+            --font-ui: 'Tahoma', 'MS Sans Serif', 'Segoe UI', monospace, sans-serif;
+            --font-mono: 'Consolas', 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--desktop-bg);
+            font-family: var(--font-ui);
+            font-size: 13px;
+            color: var(--text-dark);
+        }
+
+        /* Retro bevel helpers */
+        .bevel-out {
+            background: var(--win-bg);
+            border-top: 2px solid var(--win-border-light);
+            border-left: 2px solid var(--win-border-light);
+            border-right: 2px solid var(--win-border-darker);
+            border-bottom: 2px solid var(--win-border-darker);
+            box-shadow: inset -1px -1px 0 var(--win-border-dark), inset 1px 1px 0 #dfdfdf;
+        }
+
+        .bevel-in {
+            background: #ffffff;
+            border-top: 2px solid var(--win-border-dark);
+            border-left: 2px solid var(--win-border-dark);
+            border-right: 2px solid var(--win-border-light);
+            border-bottom: 2px solid var(--win-border-light);
+            box-shadow: inset 1px 1px 0 var(--win-border-darker);
+        }
+
+        /* Desktop layout */
+        #desktop {
+            position: relative;
+            width: 100%;
+            height: calc(100% - 34px);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            gap: 14px;
+            background:
+                radial-gradient(circle at 85% 20%, rgba(0, 255, 170, 0.08), transparent 40%),
+                linear-gradient(135deg, #006666 0%, #008080 55%, #004d4d 100%);
+        }
+
+        /* Subtle watermark on desktop */
+        .desktop-watermark {
+            position: absolute;
+            right: 20px;
+            bottom: 18px;
+            text-align: right;
+            pointer-events: none;
+            color: rgba(255, 255, 255, 0.22);
+            font-family: var(--font-mono);
+        }
+        .desktop-watermark h1 {
+            font-size: 24px;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+        .desktop-watermark p {
+            font-size: 12px;
+        }
+
+        /* Desktop Icons */
+        .desktop-icon {
+            width: 82px;
+            padding: 6px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            border: 1px dotted transparent;
+        }
+
+        .desktop-icon:hover .icon-label,
+        .desktop-icon.selected .icon-label {
+            background: var(--win-title-active);
+            color: #ffffff;
+            outline: 1px dotted #ffff00;
+        }
+
+        .icon-graphic {
+            width: 38px;
+            height: 38px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 0.45));
+        }
+
+        .icon-label {
+            color: #ffffff;
+            font-size: 12px;
+            line-height: 1.2;
+            padding: 1px 4px;
+            text-shadow: 1px 1px 1px #000000;
+            word-break: break-word;
+        }
+
+        /* Windows */
+        .window {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            min-width: 320px;
+            min-height: 220px;
+            padding: 3px;
+            box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.45);
+        }
+
+        .window.hidden {
+            display: none !important;
+        }
+
+        .window.maximized {
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .title-bar {
+            height: 24px;
+            background: linear-gradient(90deg, var(--win-title-active), var(--win-title-gradient));
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 4px 0 6px;
+            font-weight: bold;
+            font-size: 12px;
+            letter-spacing: 0.3px;
+            cursor: move;
+        }
+
+        .window.inactive .title-bar {
+            background: linear-gradient(90deg, #606060, #909090);
+            color: #d8d8d8;
+        }
+
+        .title-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .title-controls {
+            display: flex;
+            gap: 2px;
+        }
+
+        .win-btn {
+            width: 18px;
+            height: 18px;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #000;
+            font-family: var(--font-ui);
+        }
+
+        .win-btn:active {
+            border-top: 2px solid var(--win-border-darker);
+            border-left: 2px solid var(--win-border-darker);
+            border-right: 2px solid var(--win-border-light);
+            border-bottom: 2px solid var(--win-border-light);
+            padding-top: 1px;
+            padding-left: 1px;
+        }
+
+        /* Window Menu/Toolbar */
+        .window-menubar {
+            display: flex;
+            gap: 12px;
+            padding: 3px 8px;
+            border-bottom: 1px solid var(--win-border-dark);
+            font-size: 12px;
+            background: var(--win-bg);
+        }
+
+        .window-menubar span {
+            cursor: pointer;
+        }
+        .window-menubar span u {
+            text-decoration: underline;
+        }
+
+        /* Window Content Area */
+        .window-body {
+            flex: 1;
+            margin-top: 3px;
+            overflow-y: auto;
+            padding: 16px 20px;
+            user-select: text;
+            background: #ffffff;
+            color: #111111;
+            line-height: 1.55;
+        }
+
+        .window-statusbar {
+            height: 20px;
+            margin-top: 3px;
+            padding: 2px 8px;
+            font-size: 11px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--win-border-dark);
+            background: var(--win-bg);
+        }
+
+        /* Content Typography & Components */
+        .hero-banner {
+            background: linear-gradient(135deg, #000046 0%, #1cb5e0 100%);
+            color: #ffffff;
+            padding: 18px 20px;
+            border: 2px solid #000000;
+            margin-bottom: 16px;
+            box-shadow: 3px 3px 0 #808080;
+        }
+
+        .hero-banner h1 {
+            font-size: 24px;
+            margin-bottom: 4px;
+            font-family: var(--font-mono);
+            letter-spacing: 0.5px;
+        }
+
+        .hero-banner .tagline {
+            font-size: 13px;
+            color: #e0f7fa;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .hero-banner .location {
+            font-size: 12px;
+            color: #ffd54f;
+            font-family: var(--font-mono);
+        }
+
+        .section-box {
+            border: 2px solid #808080;
+            background: #f8f9fa;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            box-shadow: 2px 2px 0 #c0c0c0;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #000080;
+            border-bottom: 2px solid #000080;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+        }
+
+        .pitch-quote {
+            font-size: 13.5px;
+            background: #eef4ff;
+            border-left: 4px solid #000080;
+            padding: 10px 14px;
+            font-style: italic;
+            color: #1a1a1a;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #000000;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-top: 6px;
+        }
+
+        .action-btn:hover {
+            background: #dcdcdc;
+        }
+
+        /* Badge Clusters */
+        .skill-group {
+            margin-bottom: 14px;
+        }
+
+        .skill-group-title {
+            font-weight: bold;
+            font-size: 13px;
+            color: #222;
+            margin-bottom: 6px;
+            font-family: var(--font-mono);
+        }
+
+        .badge-cluster {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .skill-badge {
+            display: inline-block;
+            padding: 3px 9px;
+            font-size: 12px;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            background: #000080;
+            color: #ffffff;
+            border: 1px solid #000;
+            box-shadow: 2px 2px 0 #808080;
+        }
+
+        .skill-badge.alt-1 { background: #006666; }
+        .skill-badge.alt-2 { background: #4a148c; }
+        .skill-badge.alt-3 { background: #1b5e20; }
+        .skill-badge.alt-4 { background: #b71c1c; }
+
+        /* Project Cards */
+        .project-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .project-card {
+            border: 2px solid #000000;
+            background: #ffffff;
+            padding: 12px 14px;
+            box-shadow: 3px 3px 0 #808080;
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px dashed #808080;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+
+        .project-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #000080;
+            font-family: var(--font-mono);
+        }
+
+        .project-desc {
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: #222;
+        }
+
+        .project-tech {
+            font-size: 11.5px;
+            font-family: var(--font-mono);
+            color: #004d40;
+            background: #e0f2f1;
+            padding: 4px 8px;
+            border: 1px solid #00695c;
+            display: inline-block;
+        }
+
+        /* Terminal Style */
+        .terminal-body {
+            background: #0c0c0c !important;
+            color: #00ff66 !important;
+            font-family: var(--font-mono) !important;
+            padding: 12px 14px !important;
+            font-size: 13px;
+        }
+
+        .terminal-output div {
+            margin-bottom: 6px;
+            white-space: pre-wrap;
+        }
+
+        .terminal-input-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .terminal-prompt {
+            color: #00e5ff;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .terminal-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #00ff66;
+            font-family: var(--font-mono);
+            font-size: 13px;
+        }
+
+        /* Taskbar */
+        #taskbar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2px 4px;
+            z-index: 9999;
+        }
+
+        .taskbar-left {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        #start-btn {
+            height: 26px;
+            padding: 0 10px;
+            font-weight: bold;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        #start-btn.active {
+            border-top: 2px solid var(--win-border-darker);
+            border-left: 2px solid var(--win-border-darker);
+            border-right: 2px solid var(--win-border-light);
+            border-bottom: 2px solid var(--win-border-light);
+            background: #b0b0b0;
+        }
+
+        .taskbar-divider {
+            width: 2px;
+            height: 24px;
+            background: var(--win-border-dark);
+            border-right: 1px solid var(--win-border-light);
+            margin: 0 2px;
+        }
+
+        #taskbar-tabs {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+            overflow-x: auto;
+        }
+
+        .task-tab {
+            height: 26px;
+            min-width: 110px;
+            max-width: 165px;
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .task-tab.active {
+            background: #dfdfdf;
+            border-top: 2px solid var(--win-border-darker);
+            border-left: 2px solid var(--win-border-darker);
+            border-right: 2px solid var(--win-border-light);
+            border-bottom: 2px solid var(--win-border-light);
+            font-weight: bold;
+        }
+
+        .system-tray {
+            height: 26px;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-family: var(--font-mono);
+            background: var(--win-bg);
+            border-top: 1px solid var(--win-border-dark);
+            border-left: 1px solid var(--win-border-dark);
+            border-right: 1px solid var(--win-border-light);
+            border-bottom: 1px solid var(--win-border-light);
+        }
+
+        /* Start Menu */
+        #start-menu {
+            position: absolute;
+            bottom: 34px;
+            left: 2px;
+            width: 240px;
+            display: flex;
+            z-index: 10000;
+            padding: 3px;
+        }
+
+        #start-menu.hidden {
+            display: none;
+        }
+
+        .start-sidebar {
+            width: 30px;
+            background: linear-gradient(180deg, #000080 0%, #1084d0 100%);
+            color: #ffffff;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+        }
+
+        .start-sidebar span {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-weight: bold;
+            font-size: 15px;
+            letter-spacing: 1.5px;
+            font-family: var(--font-mono);
+        }
+
+        .start-items {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2px;
+        }
+
+        .start-item {
+            padding: 7px 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 12.5px;
+            color: #000;
+            text-decoration: none;
+        }
+
+        .start-item:hover {
+            background: var(--win-title-active);
+            color: #ffffff;
+        }
+
+        .start-sep {
+            height: 1px;
+            background: var(--win-border-dark);
+            border-bottom: 1px solid var(--win-border-light);
+            margin: 4px 2px;
+        }
+
+        /* Form Inputs */
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 6px 8px;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="desktop">
+        <!-- Desktop Icons -->
+        <div class="desktop-icon" onclick="openWindow('win-showcase')">
+            <div class="icon-graphic">🖥️</div>
+            <div class="icon-label">Portfolio Showcase</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('win-about')">
+            <div class="icon-graphic">👤</div>
+            <div class="icon-label">About Pratyush</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('win-skills')">
+            <div class="icon-graphic">🛠️</div>
+            <div class="icon-label">Skills &amp; Toolkit</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('win-projects')">
+            <div class="icon-graphic">🚀</div>
+            <div class="icon-label">Featured Projects</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('win-experience')">
+            <div class="icon-graphic">🎓</div>
+            <div class="icon-label">Experience &amp; Certs</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('win-terminal')">
+            <div class="icon-graphic">📟</div>
+            <div class="icon-label">FameShell Terminal</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('win-contact')">
+            <div class="icon-graphic">✉️</div>
+            <div class="icon-label">Connect / Links</div>
+        </div>
+
+        <div class="desktop-watermark">
+            <h1>PRATYUSH KUMAR (FAME)</h1>
+            <p>PratyushOS v2026.1 // Full-Stack &amp; ML Edition</p>
+        </div>
+
+        <!-- WINDOW 1: ALL-IN-ONE PORTFOLIO SHOWCASE (Open by Default) -->
+        <div id="win-showcase" class="window bevel-out" style="top: 18px; left: 115px; width: 1040px; height: 860px; z-index: 20;">
+            <div class="title-bar" onmousedown="startDrag(event, 'win-showcase')">
+                <div class="title-bar-left">
+                    <span>🖥️</span>
+                    <span>Pratyush Kumar (Fame) — Complete Portfolio Showcase</span>
+                </div>
+                <div class="title-controls">
+                    <button class="win-btn bevel-out" onclick="minimizeWindow('win-showcase')" title="Minimize">_</button>
+                    <button class="win-btn bevel-out" onclick="toggleMaximize('win-showcase')" title="Maximize">□</button>
+                    <button class="win-btn bevel-out" onclick="closeWindow('win-showcase')" title="Close">✕</button>
+                </div>
+            </div>
+            <div class="window-menubar">
+                <span onclick="openWindow('win-about')"><u>A</u>bout</span>
+                <span onclick="openWindow('win-skills')"><u>S</u>kills</span>
+                <span onclick="openWindow('win-projects')"><u>P</u>rojects</span>
+                <span onclick="openWindow('win-experience')"><u>E</u>xperience &amp; Certs</span>
+                <span onclick="openWindow('win-terminal')"><u>T</u>erminal</span>
+                <span onclick="openWindow('win-contact')"><u>C</u>ontact</span>
+            </div>
+            <div class="window-body bevel-in">
+                <!-- Hero -->
+                <div class="hero-banner">
+                    <h1>Pratyush Kumar (Fame)</h1>
+                    <div class="tagline">Full-Stack Developer &amp; Machine Learning Enthusiast | BCA (Specialization in Machine Learning) at DBS Global University</div>
+                    <div class="location">📍 Gorakhpur / Dehradun, India</div>
+                    <div style="margin-top: 10px;">
+                        <a class="action-btn bevel-out" href="https://github.com/FakerFAME" target="_blank" rel="noopener noreferrer">🐙 GitHub: github.com/FakerFAME</a>
+                        <a class="action-btn bevel-out" href="https://linkedin.com/in/fakerfame" target="_blank" rel="noopener noreferrer">💼 LinkedIn: linkedin.com/in/fakerfame</a>
+                        <button class="action-btn bevel-out" onclick="openWindow('win-projects')">🚀 Explore Projects</button>
+                        <button class="action-btn bevel-out" onclick="openWindow('win-terminal')">📟 Open Terminal</button>
+                    </div>
+                </div>
+
+                <!-- Short Bio / Elevator Pitch -->
+                <div class="section-box">
+                    <div class="section-title"><span>⚡</span> Short Bio / Elevator Pitch</div>
+                    <div class="pitch-quote">
+                        "I am a full-stack developer and machine learning practitioner passionate about building high-performance web applications, interactive 3D web experiences, and data-driven systems. From competitive coding and algorithmic problem solving to architecting cloud-enabled web platforms, I enjoy turning complex ideas into functional, clean, and visually compelling digital products."
+                    </div>
+                </div>
+
+                <!-- Technical Skills & Toolkit -->
+                <div class="section-box">
+                    <div class="section-title"><span>🛠️</span> Technical Skills &amp; Toolkit</div>
+
+                    <div class="skill-group">
+                        <div class="skill-group-title">▸ Languages</div>
+                        <div class="badge-cluster">
+                            <span class="skill-badge">C</span>
+                            <span class="skill-badge">C++</span>
+                            <span class="skill-badge">Python</span>
+                            <span class="skill-badge">Java</span>
+                            <span class="skill-badge">JavaScript</span>
+                            <span class="skill-badge">SQL</span>
+                            <span class="skill-badge">HTML5</span>
+                            <span class="skill-badge">CSS3</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-group">
+                        <div class="skill-group-title">▸ Frontend &amp; UI/UX</div>
+                        <div class="badge-cluster">
+                            <span class="skill-badge alt-1">React.js</span>
+                            <span class="skill-badge alt-1">GSAP (GreenSock Animation Platform)</span>
+                            <span class="skill-badge alt-1">Modern CSS / Glassmorphism / Terminal aesthetics</span>
+                            <span class="skill-badge alt-1">Responsive Design</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-group">
+                        <div class="skill-group-title">▸ Backend &amp; Databases</div>
+                        <div class="badge-cluster">
+                            <span class="skill-badge alt-2">Node.js</span>
+                            <span class="skill-badge alt-2">RESTful APIs</span>
+                            <span class="skill-badge alt-2">SQL (Relational Database Design &amp; Query Optimization)</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-group">
+                        <div class="skill-group-title">▸ Machine Learning &amp; Data Science</div>
+                        <div class="badge-cluster">
+                            <span class="skill-badge alt-3">NumPy</span>
+                            <span class="skill-badge alt-3">Pandas</span>
+                            <span class="skill-badge alt-3">Scikit-learn</span>
+                            <span class="skill-badge alt-3">Model Integration</span>
+                            <span class="skill-badge alt-3">Tableau (Data Visualization)</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-group" style="margin-bottom: 0;">
+                        <div class="skill-group-title">▸ Tools &amp; Platforms</div>
+                        <div class="badge-cluster">
+                            <span class="skill-badge alt-4">Git</span>
+                            <span class="skill-badge alt-4">GitHub</span>
+                            <span class="skill-badge alt-4">Vercel</span>
+                            <span class="skill-badge alt-4">AWS (SageMaker, Bedrock)</span>
+                            <span class="skill-badge alt-4">n8n Automation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Projects -->
+                <div class="section-box">
+                    <div class="section-title"><span>🚀</span> Featured Projects</div>
+                    <div class="project-grid">
+                        <div class="project-card">
+                            <div class="project-header">
+                                <span class="project-title">1. LUNAÉ – Luxury E-Commerce Web Experience</span>
+                            </div>
+                            <p class="project-desc">An interactive luxury e-commerce web platform featuring smooth 3D canvas scroll animations, high-end styling, and immersive product interaction.</p>
+                            <div class="project-tech"><strong>Tech Stack:</strong> HTML/CSS, JavaScript, GSAP / 3D Canvas</div>
+                        </div>
+
+                        <div class="project-card">
+                            <div class="project-header">
+                                <span class="project-title">2. 3D Interactive Portfolio</span>
+                            </div>
+                            <p class="project-desc">An interactive 3D web showcase incorporating Three.js mechanics, custom block-breaking interactions, and subtle Easter eggs.</p>
+                            <div class="project-tech"><strong>Tech Stack:</strong> Three.js, JavaScript, WebGL, CSS</div>
+                        </div>
+
+                        <div class="project-card">
+                            <div class="project-header">
+                                <span class="project-title">3. Freight Forecasting Dashboard (Smart India Hackathon 2026)</span>
+                            </div>
+                            <p class="project-desc">Developed with team Runtime Rebels for the Ministry of Steel (SAIL), focusing on predictive analytics and freight logistics forecasting (Qualified for Round 1).</p>
+                            <div class="project-tech"><strong>Tech Stack:</strong> Python, Data Analytics / Machine Learning, Interactive Dashboards</div>
+                        </div>
+
+                        <div class="project-card">
+                            <div class="project-header">
+                                <span class="project-title">4. Project Omen (hackFront India)</span>
+                            </div>
+                            <p class="project-desc">Innovative software solution built as an official builder for the nationwide hackFront India league under problem statement T2.1.</p>
+                            <div class="project-tech"><strong>Tech Stack:</strong> Full-Stack Architecture, API Integration</div>
+                        </div>
+
+                        <div class="project-card">
+                            <div class="project-header">
+                                <span class="project-title">5. Fame Ki Shop</span>
+                            </div>
+                            <p class="project-desc">Web application deployed on Vercel showcasing clean UI/UX, product catalog design, and web deployment workflows.</p>
+                            <div class="project-tech"><strong>Tech Stack:</strong> Full-Stack Web Development, Vercel</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Experience & Training -->
+                <div class="section-box">
+                    <div class="section-title"><span>💼</span> Experience &amp; Training</div>
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="project-title">AI &amp; Machine Learning Trainee / Intern – EWB EduTech</span>
+                        </div>
+                        <p class="project-desc" style="margin-bottom: 0;">Completed intensive live training on core ML concepts, data pipelines, model building, and hands-on assessments.</p>
+                    </div>
+                </div>
+
+                <!-- Certifications & Badges -->
+                <div class="section-box" style="margin-bottom: 0;">
+                    <div class="section-title"><span>🏆</span> Certifications &amp; Badges</div>
+                    <div class="project-grid">
+                        <div class="project-card">
+                            <div class="project-title" style="margin-bottom: 4px;">☁️ Google Cloud</div>
+                            <p class="project-desc" style="margin-bottom: 0;">Generative AI Leader (Coursera)</p>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title" style="margin-bottom: 4px;">🟧 AWS (Amazon Web Services)</div>
+                            <p class="project-desc" style="margin-bottom: 0;">Exploring Amazon Nova models using Amazon Bedrock &nbsp;|&nbsp; No-code Machine Learning &amp; Generative AI &nbsp;|&nbsp; Introduction to Amazon SageMaker Notebooks</p>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title" style="margin-bottom: 4px;">🌐 Cisco</div>
+                            <p class="project-desc" style="margin-bottom: 0;">Data Analysis Essentials (SQL &amp; Tableau)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="window-statusbar">
+                <span>Ready — Pratyush Kumar (Fame) Portfolio</span>
+                <span>Gorakhpur / Dehradun, India</span>
+            </div>
+        </div>
+
+        <!-- WINDOW 2: ABOUT -->
+        <div id="win-about" class="window bevel-out hidden" style="top: 60px; left: 180px; width: 680px; height: 480px; z-index: 15;">
+            <div class="title-bar" onmousedown="startDrag(event, 'win-about')">
+                <div class="title-bar-left"><span>👤</span><span>About — Pratyush Kumar (Fame)</span></div>
+                <div class="title-controls">
+                    <button class="win-btn bevel-out" onclick="minimizeWindow('win-about')">_</button>
+                    <button class="win-btn bevel-out" onclick="toggleMaximize('win-about')">□</button>
+                    <button class="win-btn bevel-out" onclick="closeWindow('win-about')">✕</button>
+                </div>
+            </div>
+            <div class="window-body bevel-in">
+                <div class="hero-banner">
+                    <h1>Pratyush Kumar (Fame)</h1>
+                    <div class="tagline">Full-Stack Developer &amp; Machine Learning Enthusiast</div>
+                    <div class="location">🎓 BCA (Specialization in Machine Learning) at DBS Global University</div>
+                    <div class="location" style="margin-top: 4px;">📍 Gorakhpur / Dehradun, India</div>
+                </div>
+                <div class="section-box">
+                    <div class="section-title">Elevator Pitch</div>
+                    <div class="pitch-quote">
+                        "I am a full-stack developer and machine learning practitioner passionate about building high-performance web applications, interactive 3D web experiences, and data-driven systems. From competitive coding and algorithmic problem solving to architecting cloud-enabled web platforms, I enjoy turning complex ideas into functional, clean, and visually compelling digital products."
+                    </div>
+                </div>
+                <div class="section-box" style="margin-bottom: 0;">
+                    <div class="section-title">Social &amp; Developer Profiles</div>
+                    <p style="margin-bottom: 8px;"><strong>GitHub:</strong> <a href="https://github.com/FakerFAME" target="_blank" rel="noopener noreferrer">github.com/FakerFAME</a></p>
+                    <p><strong>LinkedIn:</strong> <a href="https://linkedin.com/in/fakerfame" target="_blank" rel="noopener noreferrer">linkedin.com/in/fakerfame</a></p>
+                </div>
+            </div>
+            <div class="window-statusbar">
+                <span>Identity: Pratyush Kumar (Fame)</span>
+                <span>DBS Global University</span>
+            </div>
+        </div>
+
+        <!-- WINDOW 3: SKILLS -->
+        <div id="win-skills" class="window bevel-out hidden" style="top: 80px; left: 220px; width: 740px; height: 540px; z-index: 15;">
+            <div class="title-bar" onmousedown="startDrag(event, 'win-skills')">
+                <div class="title-bar-left"><span>🛠️</span><span>Technical Skills &amp; Toolkit</span></div>
+                <div class="title-controls">
+                    <button class="win-btn bevel-out" onclick="minimizeWindow('win-skills')">_</button>
+                    <button class="win-btn bevel-out" onclick="toggleMaximize('win-skills')">□</button>
+                    <button class="win-btn bevel-out" onclick="closeWindow('win-skills')">✕</button>
+                </div>
+            </div>
+            <div class="window-body bevel-in">
+                <div class="section-box">
+                    <div class="section-title">1. Languages</div>
+                    <div class="badge-cluster">
+                        <span class="skill-badge">C</span>
+                        <span class="skill-badge">C++</span>
+                        <span class="skill-badge">Python</span>
+                        <span class="skill-badge">Java</span>
+                        <span class="skill-badge">JavaScript</span>
+                        <span class="skill-badge">SQL</span>
+                        <span class="skill-badge">HTML5</span>
+                        <span class="skill-badge">CSS3</span>
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-title">2. Frontend &amp; UI/UX</div>
+                    <div class="badge-cluster">
+                        <span class="skill-badge alt-1">React.js</span>
+                        <span class="skill-badge alt-1">GSAP (GreenSock Animation Platform)</span>
+                        <span class="skill-badge alt-1">Modern CSS / Glassmorphism / Terminal aesthetics</span>
+                        <span class="skill-badge alt-1">Responsive Design</span>
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-title">3. Backend &amp; Databases</div>
+                    <div class="badge-cluster">
+                        <span class="skill-badge alt-2">Node.js</span>
+                        <span class="skill-badge alt-2">RESTful APIs</span>
+                        <span class="skill-badge alt-2">SQL (Relational Database Design &amp; Query Optimization)</span>
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-title">4. Machine Learning &amp; Data Science</div>
+                    <div class="badge-cluster">
+                        <span class="skill-badge alt-3">NumPy</span>
+                        <span class="skill-badge alt-3">Pandas</span>
+                        <span class="skill-badge alt-3">Scikit-learn</span>
+                        <span class="skill-badge alt-3">Model Integration</span>
+                        <span class="skill-badge alt-3">Tableau (Data Visualization)</span>
+                    </div>
+                </div>
+                <div class="section-box" style="margin-bottom: 0;">
+                    <div class="section-title">5. Tools &amp; Platforms</div>
+                    <div class="badge-cluster">
+                        <span class="skill-badge alt-4">Git</span>
+                        <span class="skill-badge alt-4">GitHub</span>
+                        <span class="skill-badge alt-4">Vercel</span>
+                        <span class="skill-badge alt-4">AWS (SageMaker, Bedrock)</span>
+                        <span class="skill-badge alt-4">n8n Automation</span>
+                    </div>
+                </div>
+            </div>
+            <div class="window-statusbar">
+                <span>5 Skill Clusters Loaded</span>
+                <span>Full-Stack + ML Stack</span>
+            </div>
+        </div>
+
+        <!-- WINDOW 4: PROJECTS -->
+        <div id="win-projects" class="window bevel-out hidden" style="top: 50px; left: 160px; width: 820px; height: 640px; z-index: 15;">
+            <div class="title-bar" onmousedown="startDrag(event, 'win-projects')">
+                <div class="title-bar-left"><span>🚀</span><span>Featured Projects — Pratyush Kumar (Fame)</span></div>
+                <div class="title-controls">
+                    <button class="win-btn bevel-out" onclick="minimizeWindow('win-projects')">_</button>
+                    <button class="win-btn bevel-out" onclick="toggleMaximize('win-projects')">□</button>
+                    <button class="win-btn bevel-out" onclick="closeWindow('win-projects')">✕</button>
+                </div>
+            </div>
+            <div class="window-body bevel-in">
+                <div class="project-grid">
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="project-title">LUNAÉ – Luxury E-Commerce Web Experience</span>
+                        </div>
+                        <p class="project-desc">An interactive luxury e-commerce web platform featuring smooth 3D canvas scroll animations, high-end styling, and immersive product interaction.</p>
+                        <div class="project-tech"><strong>Tech Stack:</strong> HTML/CSS, JavaScript, GSAP / 3D Canvas.</div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="project-title">3D Interactive Portfolio</span>
+                        </div>
+                        <p class="project-desc">An interactive 3D web showcase incorporating Three.js mechanics, custom block-breaking interactions, and subtle Easter eggs.</p>
+                        <div class="project-tech"><strong>Tech Stack:</strong> Three.js, JavaScript, WebGL, CSS.</div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="project-title">Freight Forecasting Dashboard (Smart India Hackathon 2026)</span>
+                        </div>
+                        <p class="project-desc">Developed with team Runtime Rebels for the Ministry of Steel (SAIL), focusing on predictive analytics and freight logistics forecasting (Qualified for Round 1).</p>
+                        <div class="project-tech"><strong>Tech Stack:</strong> Python, Data Analytics / Machine Learning, Interactive Dashboards.</div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="project-title">Project Omen (hackFront India)</span>
+                        </div>
+                        <p class="project-desc">Innovative software solution built as an official builder for the nationwide hackFront India league under problem statement T2.1.</p>
+                        <div class="project-tech"><strong>Tech Stack:</strong> Full-Stack Architecture, API Integration.</div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="project-title">Fame Ki Shop</span>
+                        </div>
+                        <p class="project-desc">Web application deployed on Vercel showcasing clean UI/UX, product catalog design, and web deployment workflows.</p>
+                        <div class="project-tech"><strong>Tech Stack:</strong> Full-Stack Web Development, Vercel.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="window-statusbar">
+                <span>5 Featured Projects</span>
+                <span>github.com/FakerFAME</span>
+            </div>
+        </div>
+
+        <!-- WINDOW 5: EXPERIENCE & CERTIFICATIONS -->
+        <div id="win-experience" class="window bevel-out hidden" style="top: 70px; left: 200px; width: 760px; height: 540px; z-index: 15;">
+            <div class="title-bar" onmousedown="startDrag(event, 'win-experience')">
+                <div class="title-bar-left"><span>🎓</span><span>Experience, Training &amp; Certifications</span></div>
+                <div class="title-controls">
+                    <button class="win-btn bevel-out" onclick="minimizeWindow('win-experience')">_</button>
+                    <button class="win-btn bevel-out" onclick="toggleMaximize('win-experience')">□</button>
+                    <button class="win-btn bevel-out" onclick="closeWindow('win-experience')">✕</button>
+                </div>
+            </div>
+            <div class="window-body bevel-in">
+                <div class="section-box">
+                    <div class="section-title"><span>💼</span> Experience &amp; Training</div>
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="project-title">AI &amp; Machine Learning Trainee / Intern – EWB EduTech</span>
+                        </div>
+                        <p class="project-desc" style="margin-bottom: 0;">Completed intensive live training on core ML concepts, data pipelines, model building, and hands-on assessments.</p>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-title"><span>🎓</span> Academic Background</div>
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="project-title">BCA (Specialization in Machine Learning) — DBS Global University</span>
+                        </div>
+                        <p class="project-desc" style="margin-bottom: 0;">Dehradun / Gorakhpur, India</p>
+                    </div>
+                </div>
+
+                <div class="section-box" style="margin-bottom: 0;">
+                    <div class="section-title"><span>🏆</span> Certifications &amp; Badges</div>
+                    <div class="project-grid">
+                        <div class="project-card">
+                            <div class="project-title">☁️ Google Cloud</div>
+                            <p class="project-desc" style="margin-bottom: 0;">Generative AI Leader (Coursera)</p>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title">🟧 AWS</div>
+                            <p class="project-desc" style="margin-bottom: 0;">Exploring Amazon Nova models using Amazon Bedrock | No-code Machine Learning &amp; Generative AI | Introduction to Amazon SageMaker Notebooks</p>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title">🌐 Cisco</div>
+                            <p class="project-desc" style="margin-bottom: 0;">Data Analysis Essentials (SQL &amp; Tableau)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="window-statusbar">
+                <span>Experience &amp; Certifications Verified</span>
+                <span>Pratyush Kumar (Fame)</span>
+            </div>
+        </div>
+
+        <!-- WINDOW 6: INTERACTIVE TERMINAL -->
+        <div id="win-terminal" class="window bevel-out hidden" style="top: 110px; left: 260px; width: 680px; height: 430px; z-index: 15;">
+            <div class="title-bar" onmousedown="startDrag(event, 'win-terminal')">
+                <div class="title-bar-left"><span>📟</span><span>FameShell v1.0 — C:\Users\PratyushKumar\fame.exe</span></div>
+                <div class="title-controls">
+                    <button class="win-btn bevel-out" onclick="minimizeWindow('win-terminal')">_</button>
+                    <button class="win-btn bevel-out" onclick="toggleMaximize('win-terminal')">□</button>
+                    <button class="win-btn bevel-out" onclick="closeWindow('win-terminal')">✕</button>
+                </div>
+            </div>
+            <div class="window-body bevel-in terminal-body" onclick="document.getElementById('term-input').focus()">
+                <div id="term-output" class="terminal-output">
+                    <div>PratyushOS FameShell [Version 2026.10]</div>
+                    <div>(c) 2026 Pratyush Kumar (Fame). All rights reserved.</div>
+                    <div>Type <strong>help</strong> for a list of available commands.</div>
+                    <div>------------------------------------------------------------</div>
+                </div>
+                <div class="terminal-input-row">
+                    <span class="terminal-prompt">fame@pratyush-os:~$</span>
+                    <input id="term-input" class="terminal-input" type="text" autocomplete="off" spellcheck="false" autofocus />
+                </div>
+            </div>
+            <div class="window-statusbar">
+                <span>Interactive Terminal (Sound effects active on keypress)</span>
+                <span>UTF-8</span>
+            </div>
+        </div>
+
+        <!-- WINDOW 7: CONTACT & LINKS -->
+        <div id="win-contact" class="window bevel-out hidden" style="top: 90px; left: 240px; width: 600px; height: 500px; z-index: 15;">
+            <div class="title-bar" onmousedown="startDrag(event, 'win-contact')">
+                <div class="title-bar-left"><span>✉️</span><span>Connect with Pratyush Kumar (Fame)</span></div>
+                <div class="title-controls">
+                    <button class="win-btn bevel-out" onclick="minimizeWindow('win-contact')">_</button>
+                    <button class="win-btn bevel-out" onclick="toggleMaximize('win-contact')">□</button>
+                    <button class="win-btn bevel-out" onclick="closeWindow('win-contact')">✕</button>
+                </div>
+            </div>
+            <div class="window-body bevel-in">
+                <div class="section-box">
+                    <div class="section-title">Social &amp; Developer Links</div>
+                    <p style="margin-bottom: 10px;">
+                        🐙 <strong>GitHub:</strong>
+                        <a href="https://github.com/FakerFAME" target="_blank" rel="noopener noreferrer">github.com/FakerFAME</a>
+                    </p>
+                    <p style="margin-bottom: 10px;">
+                        💼 <strong>LinkedIn:</strong>
+                        <a href="https://linkedin.com/in/fakerfame" target="_blank" rel="noopener noreferrer">linkedin.com/in/fakerfame</a>
+                    </p>
+                    <p>
+                        📍 <strong>Location:</strong> Gorakhpur / Dehradun, India
+                    </p>
+                </div>
+
+                <div class="section-box" style="margin-bottom: 0;">
+                    <div class="section-title">Send a Direct Message</div>
+                    <form id="contact-form" onsubmit="submitContact(event)">
+                        <div class="form-group">
+                            <label>Your Name *</label>
+                            <input type="text" id="c-name" class="form-input bevel-in" required placeholder="Enter your name" />
+                        </div>
+                        <div class="form-group">
+                            <label>Your Email *</label>
+                            <input type="email" id="c-email" class="form-input bevel-in" required placeholder="name@example.com" />
+                        </div>
+                        <div class="form-group">
+                            <label>Organization / Company</label>
+                            <input type="text" id="c-company" class="form-input bevel-in" placeholder="Optional" />
+                        </div>
+                        <div class="form-group">
+                            <label>Message *</label>
+                            <textarea id="c-message" rows="3" class="form-input bevel-in" required placeholder="Write a message to Pratyush..."></textarea>
+                        </div>
+                        <button type="submit" class="action-btn bevel-out">📨 Send Message</button>
+                        <span id="contact-status" style="margin-left: 10px; font-weight: bold;"></span>
+                    </form>
+                </div>
+            </div>
+            <div class="window-statusbar">
+                <span>Online</span>
+                <span>Gorakhpur / Dehradun, India</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- START MENU -->
+    <div id="start-menu" class="bevel-out hidden">
+        <div class="start-sidebar">
+            <span>PRATYUSH OS</span>
+        </div>
+        <div class="start-items">
+            <div class="start-item" onclick="openWindow('win-showcase'); closeStartMenu();">🖥️ Portfolio Showcase</div>
+            <div class="start-item" onclick="openWindow('win-about'); closeStartMenu();">👤 About Pratyush</div>
+            <div class="start-item" onclick="openWindow('win-skills'); closeStartMenu();">🛠️ Technical Skills</div>
+            <div class="start-item" onclick="openWindow('win-projects'); closeStartMenu();">🚀 Featured Projects</div>
+            <div class="start-item" onclick="openWindow('win-experience'); closeStartMenu();">🎓 Experience &amp; Certs</div>
+            <div class="start-item" onclick="openWindow('win-terminal'); closeStartMenu();">📟 FameShell Terminal</div>
+            <div class="start-item" onclick="openWindow('win-contact'); closeStartMenu();">✉️ Connect / Contact</div>
+            <div class="start-sep"></div>
+            <a class="start-item" href="https://github.com/FakerFAME" target="_blank" rel="noopener noreferrer">🐙 GitHub (@FakerFAME)</a>
+            <a class="start-item" href="https://linkedin.com/in/fakerfame" target="_blank" rel="noopener noreferrer">💼 LinkedIn (@fakerfame)</a>
+        </div>
+    </div>
+
+    <!-- TASKBAR -->
+    <div id="taskbar" class="bevel-out">
+        <div class="taskbar-left">
+            <button id="start-btn" class="bevel-out" onclick="toggleStartMenu(event)">
+                <span>⚡</span>
+                <span>Start</span>
+            </button>
+            <div class="taskbar-divider"></div>
+            <div id="taskbar-tabs"></div>
+        </div>
+        <div class="system-tray">
+            <span>🔊</span>
+            <span id="tray-clock">12:00 PM</span>
+        </div>
+    </div>
+
+    <script>
+        /* ==============================================================
+         * 1. Bubble Events to Parent 3D Scene (Camera & Positional Audio)
+         * ============================================================== */
+        document.addEventListener('mousemove', (e) => {
+            window.parent.postMessage({
+                type: 'mousemove',
+                clientX: e.clientX,
+                clientY: e.clientY
+            }, '*');
+        });
+
+        document.addEventListener('mousedown', () => {
+            window.parent.postMessage({ type: 'mousedown' }, '*');
+        });
+
+        document.addEventListener('mouseup', () => {
+            window.parent.postMessage({ type: 'mouseup' }, '*');
+        });
+
+        document.addEventListener('keydown', (e) => {
+            window.parent.postMessage({
+                type: 'keydown',
+                key: e.key
+            }, '*');
+        });
+
+        document.addEventListener('keyup', (e) => {
+            window.parent.postMessage({
+                type: 'keyup',
+                key: e.key
+            }, '*');
+        });
+
+        /* ==============================================================
+         * 2. Window Manager
+         * ============================================================== */
+        let topZ = 30;
+        const windowMeta = {
+            'win-showcase':   { title: '🖥️ Portfolio Showcase', open: true, minimized: false },
+            'win-about':      { title: '👤 About Pratyush',     open: false, minimized: false },
+            'win-skills':     { title: '🛠️ Skills & Toolkit',   open: false, minimized: false },
+            'win-projects':   { title: '🚀 Featured Projects',  open: false, minimized: false },
+            'win-experience': { title: '🎓 Experience & Certs', open: false, minimized: false },
+            'win-terminal':   { title: '📟 FameShell',          open: false, minimized: false },
+            'win-contact':    { title: '✉️ Connect',            open: false, minimized: false }
+        };
+
+        function focusWindow(id) {
+            topZ++;
+            Object.keys(windowMeta).forEach((winId) => {
+                const el = document.getElementById(winId);
+                if (!el) return;
+                if (winId === id) {
+                    el.style.zIndex = topZ;
+                    el.classList.remove('inactive');
+                } else {
+                    el.classList.add('inactive');
+                }
+            });
+            renderTaskbar();
+        }
+
+        function openWindow(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            windowMeta[id].open = true;
+            windowMeta[id].minimized = false;
+            el.classList.remove('hidden');
+            focusWindow(id);
+            if (id === 'win-terminal') {
+                setTimeout(() => document.getElementById('term-input')?.focus(), 50);
+            }
+        }
+
+        function closeWindow(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            windowMeta[id].open = false;
+            windowMeta[id].minimized = false;
+            el.classList.add('hidden');
+            el.classList.remove('maximized');
+            renderTaskbar();
+        }
+
+        function minimizeWindow(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            windowMeta[id].minimized = true;
+            el.classList.add('hidden');
+            renderTaskbar();
+        }
+
+        function toggleMaximize(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.toggle('maximized');
+            focusWindow(id);
+        }
+
+        function renderTaskbar() {
+            const container = document.getElementById('taskbar-tabs');
+            container.innerHTML = '';
+            let highestId = null;
+            let highestZ = -1;
+
+            Object.keys(windowMeta).forEach((id) => {
+                const el = document.getElementById(id);
+                if (windowMeta[id].open && !windowMeta[id].minimized && el) {
+                    const z = parseInt(el.style.zIndex || '0', 10);
+                    if (z > highestZ) {
+                        highestZ = z;
+                        highestId = id;
+                    }
+                }
+            });
+
+            Object.keys(windowMeta).forEach((id) => {
+                const meta = windowMeta[id];
+                if (!meta.open) return;
+                const btn = document.createElement('button');
+                btn.className = 'task-tab bevel-out' + (id === highestId && !meta.minimized ? ' active' : '');
+                btn.textContent = meta.title;
+                btn.onclick = () => {
+                    if (meta.minimized) {
+                        openWindow(id);
+                    } else if (id === highestId) {
+                        minimizeWindow(id);
+                    } else {
+                        focusWindow(id);
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        // Focus window when clicked anywhere
+        document.querySelectorAll('.window').forEach((win) => {
+            win.addEventListener('mousedown', () => {
+                focusWindow(win.id);
+            });
+        });
+
+        // Dragging logic
+        let dragTarget = null;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+
+        function startDrag(e, id) {
+            if (e.target.tagName === 'BUTTON') return;
+            const el = document.getElementById(id);
+            if (!el || el.classList.contains('maximized')) return;
+            focusWindow(id);
+            dragTarget = el;
+            dragOffsetX = e.clientX - el.offsetLeft;
+            dragOffsetY = e.clientY - el.offsetTop;
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            if (!dragTarget) return;
+            const maxX = window.innerWidth - 80;
+            const maxY = window.innerHeight - 60;
+            const nx = Math.max(0, Math.min(maxX, e.clientX - dragOffsetX));
+            const ny = Math.max(0, Math.min(maxY, e.clientY - dragOffsetY));
+            dragTarget.style.left = nx + 'px';
+            dragTarget.style.top = ny + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            dragTarget = null;
+        });
+
+        /* ==============================================================
+         * 3. Start Menu & Clock
+         * ============================================================== */
+        function toggleStartMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('start-menu');
+            const btn = document.getElementById('start-btn');
+            menu.classList.toggle('hidden');
+            btn.classList.toggle('active');
+        }
+
+        function closeStartMenu() {
+            document.getElementById('start-menu').classList.add('hidden');
+            document.getElementById('start-btn').classList.remove('active');
+        }
+
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('start-menu');
+            if (!menu.contains(e.target) && e.target.id !== 'start-btn') {
+                closeStartMenu();
+            }
+        });
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('tray-clock').textContent = now.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        /* ==============================================================
+         * 4. Interactive FameShell Terminal
+         * ============================================================== */
+        const termInput = document.getElementById('term-input');
+        const termOutput = document.getElementById('term-output');
+
+        const commands = {
+            help: () => [
+                'Available FameShell commands:',
+                '  whoami       - Display Name, Headline & Location',
+                '  bio          - Read Pratyush\'s short bio / elevator pitch',
+                '  skills       - List technical skills & toolkit clusters',
+                '  projects     - List featured projects',
+                '  experience   - Show internship & training experience',
+                '  certs        - Display Google Cloud, AWS & Cisco certifications',
+                '  socials      - Show GitHub & LinkedIn links',
+                '  clear        - Clear terminal output'
+            ].join('\n'),
+            whoami: () => [
+                'Name:     Pratyush Kumar (Fame)',
+                'Headline: Full-Stack Developer & Machine Learning Enthusiast',
+                'Degree:   BCA (Specialization in Machine Learning) at DBS Global University',
+                'Location: Gorakhpur / Dehradun, India'
+            ].join('\n'),
+            bio: () => '"I am a full-stack developer and machine learning practitioner passionate about building high-performance web applications, interactive 3D web experiences, and data-driven systems. From competitive coding and algorithmic problem solving to architecting cloud-enabled web platforms, I enjoy turning complex ideas into functional, clean, and visually compelling digital products."',
+            skills: () => [
+                '[Languages]        C, C++, Python, Java, JavaScript, SQL, HTML5, CSS3',
+                '[Frontend & UI/UX] React.js, GSAP, Modern CSS / Glassmorphism / Terminal aesthetics, Responsive Design',
+                '[Backend & DB]     Node.js, RESTful APIs, SQL (Relational DB Design & Query Optimization)',
+                '[ML & Data Sci]    NumPy, Pandas, Scikit-learn, Model Integration, Tableau',
+                '[Tools/Platforms]  Git, GitHub, Vercel, AWS (SageMaker, Bedrock), n8n Automation'
+            ].join('\n'),
+            projects: () => [
+                '1. LUNAÉ – Luxury E-Commerce Web Experience (HTML/CSS, JS, GSAP / 3D Canvas)',
+                '2. 3D Interactive Portfolio (Three.js, JS, WebGL, CSS)',
+                '3. Freight Forecasting Dashboard - SIH 2026 / SAIL Round 1 (Python, ML, Dashboards)',
+                '4. Project Omen - hackFront India T2.1 (Full-Stack Architecture, API Integration)',
+                '5. Fame Ki Shop (Full-Stack Web Development, Vercel)'
+            ].join('\n'),
+            experience: () => [
+                'AI & Machine Learning Trainee / Intern – EWB EduTech',
+                '  -> Completed intensive live training on core ML concepts, data pipelines, model building, and hands-on assessments.'
+            ].join('\n'),
+            certs: () => [
+                '• Google Cloud: Generative AI Leader (Coursera)',
+                '• AWS: Exploring Amazon Nova models using Amazon Bedrock | No-code ML & GenAI | Intro to Amazon SageMaker Notebooks',
+                '• Cisco: Data Analysis Essentials (SQL & Tableau)'
+            ].join('\n'),
+            socials: () => [
+                'GitHub:   https://github.com/FakerFAME',
+                'LinkedIn: https://linkedin.com/in/fakerfame'
+            ].join('\n')
+        };
+
+        termInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const raw = termInput.value.trim();
+                const cmd = raw.toLowerCase();
+                const cmdLine = document.createElement('div');
+                cmdLine.innerHTML = `<span style="color:#00e5ff">fame@pratyush-os:~$</span> ${raw}`;
+                termOutput.appendChild(cmdLine);
+
+                if (cmd === 'clear') {
+                    termOutput.innerHTML = '';
+                } else if (cmd in commands) {
+                    const res = document.createElement('div');
+                    res.textContent = commands[cmd]();
+                    termOutput.appendChild(res);
+                } else if (cmd !== '') {
+                    const err = document.createElement('div');
+                    err.style.color = '#ff6b6b';
+                    err.textContent = `Command not found: '${raw}'. Type 'help' for available commands.`;
+                    termOutput.appendChild(err);
+                }
+
+                termInput.value = '';
+                termInput.parentElement.parentElement.scrollTop = termInput.parentElement.parentElement.scrollHeight;
+            }
+        });
+
+        /* ==============================================================
+         * 5. Contact Form Submission
+         * ============================================================== */
+        function submitContact(e) {
+            e.preventDefault();
+            const status = document.getElementById('contact-status');
+            const payload = {
+                name: document.getElementById('c-name').value,
+                email: document.getElementById('c-email').value,
+                company: document.getElementById('c-company').value,
+                message: document.getElementById('c-message').value
+            };
+
+            status.style.color = '#000080';
+            status.textContent = 'Sending...';
+
+            fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then((res) => {
+                if (res.ok) {
+                    status.style.color = '#1b5e20';
+                    status.textContent = '✓ Message sent!';
+                    document.getElementById('contact-form').reset();
+                } else {
+                    status.style.color = '#006666';
+                    status.textContent = '✓ Saved locally (Connect via LinkedIn/GitHub!)';
+                }
+            })
+            .catch(() => {
+                status.style.color = '#006666';
+                status.textContent = '✓ Connect directly via GitHub/LinkedIn above!';
+            });
+        }
+
+        // Initial render
+        renderTaskbar();
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,19 @@
+
+{
+    "compilerOptions": {
+        "target": "ES2017",
+        "lib": ["ES2017", "DOM"],
+        "moduleResolution": "node",
+        "strict": true,
+        "paths": {
+            "three/examples/jsm/libs/dat.gui.module": ["../node_modules/@types/dat.gui"]
+        },
+        "strictPropertyInitialization": false,
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true,
+        "types": ["react", "react-dom", "three", "stats.js"],
+        "jsx": "react",
+    },
+    
+    "include": ["Application/*", "./*"],
+}
