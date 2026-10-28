@@ -2,7 +2,7 @@
     "name": "pratyush-kumar-3d-portfolio",
     "version": "1.0.0",
     "description": "Pratyush Kumar (Fame) — 3D Interactive Portfolio & PratyushOS Showcase",
-    "repository": "https://github.com/FakerFAME",
+    "repository": "https://github.com/FakerFAME/Portfolio_2026.git",
     "license": "MIT",
     "scripts": {
         "start": "node server/index.ts",

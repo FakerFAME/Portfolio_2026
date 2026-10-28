@@ -44,9 +44,8 @@ app.post('/api/send-email', (req, res) => {
                     from: `"${name}" <${folioEmail}>`, // sender address
                     to: folioEmail, // list of receivers
                     replyTo: email,
-                    subject: `${name} <${email}> ${
-                        company ? `from ${company}` : ''
-                    } submitted a contact form`, // Subject line
+                    subject: `${name} <${email}> ${company ? `from ${company}` : ''
+                        } submitted a contact form`, // Subject line
                     text: `Name: ${name}\nEmail: ${email}\nCompany: ${company || 'N/A'}\n\nMessage:\n${message}`, // plain text body
                 })
                 .then((info) => {
