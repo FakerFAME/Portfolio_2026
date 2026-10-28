@@ -25,11 +25,13 @@ app.use(bodyParser.json());
 app.post('/api/send-email', (req, res) => {
     const { name, company, email, message } = req.body;
 
+    const folioEmail = process.env.FOLIO_EMAIL || 'pratyushkumar.pk83@gmail.com';
+
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
         auth: {
-            user: process.env.FOLIO_EMAIL,
+            user: folioEmail,
             pass: process.env.FOLIO_PASSWORD,
         },
     });
@@ -39,12 +41,13 @@ app.post('/api/send-email', (req, res) => {
         .then(() => {
             transporter
                 .sendMail({
-                    from: `"${name}" <${process.env.FOLIO_EMAIL || 'pratyushkumar.folio@gmail.com'}>`, // sender address
-                    to: process.env.FOLIO_EMAIL || 'pratyushkumar.folio@gmail.com', // list of receivers
+                    from: `"${name}" <${folioEmail}>`, // sender address
+                    to: folioEmail, // list of receivers
+                    replyTo: email,
                     subject: `${name} <${email}> ${
                         company ? `from ${company}` : ''
                     } submitted a contact form`, // Subject line
-                    text: `${message}`, // plain text body
+                    text: `Name: ${name}\nEmail: ${email}\nCompany: ${company || 'N/A'}\n\nMessage:\n${message}`, // plain text body
                 })
                 .then((info) => {
                     console.log({ info });

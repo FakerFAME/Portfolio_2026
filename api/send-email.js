@@ -6,11 +6,11 @@ module.exports = async (req, res) => {
     }
 
     const { name, company, email, message } = req.body || {};
+    const folioEmail = process.env.FOLIO_EMAIL || 'pratyushkumar.pk83@gmail.com';
 
-    if (!process.env.FOLIO_EMAIL || !process.env.FOLIO_PASSWORD) {
-        return res.status(200).json({
-            message: 'success',
-            note: 'Contact submission received (configure FOLIO_EMAIL and FOLIO_PASSWORD in Vercel for SMTP forwarding).',
+    if (!process.env.FOLIO_PASSWORD) {
+        return res.status(503).json({
+            error: 'SMTP not configured. Set FOLIO_EMAIL and FOLIO_PASSWORD in Vercel Environment Variables.',
         });
     }
 
@@ -19,19 +19,20 @@ module.exports = async (req, res) => {
             host: 'smtp.gmail.com',
             port: 587,
             auth: {
-                user: process.env.FOLIO_EMAIL,
+                user: folioEmail,
                 pass: process.env.FOLIO_PASSWORD,
             },
         });
 
         await transporter.verify();
         await transporter.sendMail({
-            from: `"${name}" <${process.env.FOLIO_EMAIL}>`,
-            to: process.env.FOLIO_EMAIL,
+            from: `"${name}" <${folioEmail}>`,
+            to: folioEmail,
+            replyTo: email,
             subject: `${name} <${email}> ${
                 company ? `from ${company}` : ''
             } submitted a contact form`,
-            text: `${message}`,
+            text: `Name: ${name}\nEmail: ${email}\nCompany: ${company || 'N/A'}\n\nMessage:\n${message}`,
         });
 
         return res.status(200).json({ message: 'success' });
